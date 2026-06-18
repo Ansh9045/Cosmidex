@@ -11,7 +11,7 @@ distlib==0.4.1
 filelock==3.29.0
 fonttools==4.63.0
 jaraco.collections==5.1.0
-jaraco.context==6.1.3.dev0+g098f39c91.d20260403
+jaraco.context==6.1.3
 jaraco.functools==4.1.0
 jaraco.text==4.0.0
 kiwisolver==1.5.0
@@ -52,7 +52,7 @@ shiboken6==6.11.1
 shiboken6-generator==6.11.1
 six==1.17.0
 smbus==1.1
-TBB @ file:///build/onetbb/src/build/python/python_build
+TBB
 typing_extensions==4.15.0
 VapourSynth==76
 vici==6.0.6

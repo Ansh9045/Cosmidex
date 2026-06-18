@@ -1,2 +1,12 @@
-backend/venv/**/*
 backend/venv/
+**/__pycache__/
+*.pyc
+backend/train/train_images/
+backend/train/all_pokemon_images/
+backend/train/pokemon_dataset/
+backend/train/timed_out_ua.txt
+backend/train/*.csv
+backend/train/timeouts/
+backend/train/*_results.png
+backend/train/success.png
+backend/train/results.png
