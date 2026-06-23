@@ -10,3 +10,14 @@ backend/train/timeouts/
 backend/train/*_results.png
 backend/train/success.png
 backend/train/results.png
+backend/train/best_saved_model/
+*.npy
+backend/**/*.png
+backend/**/**.jpg
+backend/**/**.jpeg
+frontend/src/components/blank2
+frontend/src/components/blank
+frontend2/
+runs/
+
+*.gitignore

@@ -184,9 +184,9 @@ if __name__ == "__main__":
     pokemon_list = load_pokemon_from_csv(CSV_FILEPATH)
     print(f"Total remaining pokemon to scrape from CSV: {len(pokemon_list)}")
     
-    # if not pokemon_list:
-    #     print(f"No Pokémon found in {CSV_FILEPATH}. Please add them under a 'pokemon_name' header.")
-    #     exit()
+    if not pokemon_list:
+        print(f"No Pokémon found in {CSV_FILEPATH}. Please add them under a 'pokemon_name' header.")
+        exit()
 
     options = uc.ChromeOptions()
     options.add_argument("--window-size=1920,1080")
@@ -196,15 +196,15 @@ if __name__ == "__main__":
     driver = uc.Chrome(options=options, version_main=149)
     
     try:
-        # for pokemon in list(pokemon_list):
-        #     print(f"\n--- Starting {pokemon} ---")
+        for pokemon in list(pokemon_list):
+            print(f"\n--- Starting {pokemon} ---")
             
-        #     for query in search_queries:
-        #         scrape_pokemon_images(driver, f"{pokemon} {query}", pokemon, target_num=100)
+            for query in search_queries:
+                scrape_pokemon_images(driver, f"{pokemon} {query}", pokemon, target_num=100)
             
-        #     print(f"Finished downloading all categories for {pokemon}. Removing from CSV...")
-        #     remove_pokemon_from_csv(CSV_FILEPATH, pokemon)
-        scrape_pokemon_images(driver, "Beedrill single official artwork", "Beedrill", target_num=100)
+            print(f"Finished downloading all categories for {pokemon}. Removing from CSV...")
+            remove_pokemon_from_csv(CSV_FILEPATH, pokemon)
+        # scrape_pokemon_images(driver, "Beedrill single official artwork", "Beedrill", target_num=100)
             
     finally:
         print("Closing browser instance...")
