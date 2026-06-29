@@ -4,12 +4,12 @@
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,20 +17,23 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs to access to your camera.",
-        "NSMicrophoneUsageDescription": "This app needs to access to your Microphone."
+        "NSMicrophoneUsageDescription": "This app needs to access to your Microphone.",
+        "NSPhotoLibraryAddUsageDescription": "$(PRODUCT_NAME) needs photo library permissions",
+        "NSPhotoLibraryUsageDescription": "$(PRODUCT_NAME) needs photo library permissions"
       },
       "bundleIdentifier": "com.anonymous.frontend"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "jsEngine": "hermes",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES"
       ],
       "package": "com.anonymous.frontend"
     },
