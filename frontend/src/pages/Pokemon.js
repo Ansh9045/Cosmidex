@@ -55,6 +55,7 @@ const typeBackgrounds = {
   poison: require('../../assets/poison.jpg'),
   psychic: require('../../assets/psychic.jpg'),
   rock: require('../../assets/rock.png'),
+  fairy: require('../../assets/fairy.jpg'),
 }
 const home = require('../../assets/bg7.jpg')
 const typeColours = {

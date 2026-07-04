@@ -10,15 +10,16 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import Home from './pages/Home';
 import {BlurView} from 'expo-blur'
 import Pokemon from './pages/Pokemon';
-
+import NotConfident from './pages/NotConfident'
 
 const home = require('../assets/bg7.jpg')
 export default function App() {
   const [backgroundImage, setBackgroundImage] = useState(home)
-  const [mode, setMode] = useState(null)
+  const [mode, setMode] = useState('pokemon')
   const [model, setModel] = useState(null)
   const [pokemon, setPokemon] = useState("bulbasaur")
   const [blur, setBlur] = useState(0)
+  const [top5, setTop5] = useState([])
   useEffect(() => {
     async function loadModel() {
       try {
@@ -43,9 +44,10 @@ export default function App() {
         <ImageBackground source={backgroundImage} className="flex-1" resizeMode="cover" blurRadius={blur}>
           <SafeAreaView className="flex-1">
             {!pokemon && !mode && <Home setMode={setMode}/>}
-            {!pokemon && mode=="camera" && <CameraComponent model={model} setPokemon={setPokemon} setMode={setMode}/>}
-            {!pokemon && mode=="upload" && <UploadComponent model={model} setPokemon={setPokemon} setMode={setMode}/>}
-            {pokemon && <Pokemon pokemon={pokemon} setBlur={setBlur} setBackgroundImage={setBackgroundImage} setPokemon={setPokemon} setMode={setMode}/>}
+            {!pokemon && mode=="camera" && <CameraComponent model={model} setPokemon={setPokemon} setMode={setMode} setTop5={setTop5}/>}
+            {!pokemon && mode=="upload" && <UploadComponent model={model} setPokemon={setPokemon} setMode={setMode} setTop5={setTop5}/>}
+            {pokemon &&mode=='pokemon' && <Pokemon pokemon={pokemon} setBlur={setBlur} setBackgroundImage={setBackgroundImage} setPokemon={setPokemon} setMode={setMode}/>}
+            {mode=='notConfident' && <NotConfident top5={top5} setMode={setMode} setPokemon={setPokemon} setBackgroundImage={setBackgroundImage} setBlur={setBlur}/>}
           </SafeAreaView>
         </ImageBackground>
       </SafeAreaProvider>

@@ -21,7 +21,7 @@ const convertIntoRGB = (data) => {
 }
 
 
-export default function UploadComponent({model, setMode, setPokemon}) {
+export default function UploadComponent({model, setMode, setPokemon, setTop5}) {
     const [image, setImage] = useState(null)
     const [prediction, setPrediction] = useState(null)
     
@@ -78,17 +78,20 @@ export default function UploadComponent({model, setMode, setPokemon}) {
                                 maxIndex = i
                             }
                         }
-                        if (maxIndex != -1 && maxConfidence > 0.4) {
+                        if (maxIndex != -1 && maxConfidence > 0.2) {
                             const PokemonName = POKEMONS[maxIndex] || `unknown index ${maxIndex}`
                             const predPct = maxConfidence.toFixed(2) * 100
                             setPrediction(`Prediction: ${PokemonName} with confidence ${predPct}%`)
                             console.log(`Prediction: ${PokemonName} with confidence ${predPct}%`)
+                            setMode('pokemon')
                             setPokemon(PokemonName)
                         } else {
                             console.log("Max confidence: ", maxConfidence)
                             console.log("Max index: ", maxIndex)
                             console.log("predicted pokemon: ", POKEMONS[maxIndex])
                             setPrediction("No confident prediction")
+                            setTop5(top5)
+                            setMode('notConfident')
                             console.log("No confident prediction")
                         }
                     } catch (error) {

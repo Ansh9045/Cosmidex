@@ -21,7 +21,7 @@ const convertIntoRGB = (data) => {
     return inputBuffer
 }
 
-const CameraComponent = ({ model, setMode, setPokemon }) => {
+const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
     const { hasPermission, requestPermission } = useCameraPermission()
     const device = useCameraDevice('back')
     const [prediction, setPrediction] = useState("Scanning...")
@@ -84,12 +84,15 @@ const CameraComponent = ({ model, setMode, setPokemon }) => {
                         const predPct = maxConfidence.toFixed(2) * 100
                         setPrediction(`Prediction: ${PokemonName} with confidence ${predPct}%`)
                         console.log(`Prediction: ${PokemonName} with confidence ${predPct}%`)
+                        setMode('pokemon')
                         setPokemon(PokemonName.toLowerCase())
                     } else {
                         console.log("Max confidence: ", maxConfidence)
                         console.log("Max index: ", maxIndex)
                         console.log("predicted pokemon: ", POKEMONS[maxIndex])
                         setPrediction("No confident prediction")
+                        setTop5(top5)
+                        setMode('notConfident')
                         console.log("No confident prediction")
                     }
                     photo.dispose()
