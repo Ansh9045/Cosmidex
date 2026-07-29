@@ -2,4 +2,4 @@ from ultralytics import YOLO
 
 model = YOLO("best.pt")
 
-success = model.export(format="tflite")
+success = model.export(format="tfjs", imgsz=224)

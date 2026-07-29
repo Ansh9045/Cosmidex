@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View, Button, Pressable } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Camera, useCameraPermission, useFrameOutput, usePhotoOutput, useCameraDevice } from 'react-native-vision-camera'
-import { NitroImage } from 'react-native-nitro-image'
-import { loadTensorflowModel, TensorflowModel } from 'react-native-fast-tflite'
-import { Asset } from 'expo-asset'
+import {useNavigation} from '@react-navigation/native'
 
 const POKEMONS = ['Abra', 'Aerodactyl', 'Alakazam', 'Arbok', 'Arcanine', 'Articuno', 'Beedrill', 'Bellsprout', 'Blastoise', 'Bulbasaur', 'Butterfree', 'Caterpie', 'Chansey', 'Charizard', 'Charmander', 'Charmeleon', 'Clefable', 'Clefairy', 'Cloyster', 'Cubone', 'Dewgong', 'Diglett', 'Ditto', 'Dodrio', 'Doduo', 'Dragonair', 'Dragonite', 'Dratini', 'Drowzee', 'Dugtrio', 'Eevee', 'Ekans', 'Electabuzz', 'Electrode', 'Exeggcute', 'Exeggutor', "Farfetch'd", 'Fearow', 'Flareon', 'Gastly', 'Gengar', 'Geodude', 'Gloom', 'Golbat', 'Goldeen', 'Golduck', 'Golem', 'Graveler', 'Grimer', 'Growlithe', 'Gyarados', 'Haunter', 'Hitmonchan', 'Hitmonlee', 'Horsea', 'Hypno', 'Ivysaur', 'Jigglypuff', 'Jolteon', 'Jynx', 'Kabuto', 'Kabutops', 'Kadabra', 'Kakuna', 'Kangaskhan', 'Kingler', 'Koffing', 'Krabby', 'Lapras', 'Lickitung', 'Machamp', 'Machoke', 'Machop', 'Magikarp', 'Magmar', 'Magnemite', 'Magneton', 'Mankey', 'Marowak', 'Meowth', 'Metapod', 'Mew', 'Mewtwo', 'Moltres', 'Mr. Mime', 'Muk', 'Nidoking', 'Nidoqueen', 'Nidoran♀', 'Nidoran♂', 'Nidorina', 'Nidorino', 'Ninetales', 'Oddish', 'Omanyte', 'Omastar', 'Onix', 'Paras', 'Parasect', 'Persian', 'Pidgeot', 'Pidgeotto', 'Pidgey', 'Pikachu', 'Pinsir', 'Poliwag', 'Poliwhirl', 'Poliwrath', 'Ponyta', 'Porygon', 'Primeape', 'Psyduck', 'Raichu', 'Rapidash', 'Raticate', 'Rattata', 'Rhydon', 'Rhyhorn', 'Sandshrew', 'Sandslash', 'Scyther', 'Seadra', 'Seaking', 'Seel', 'Shellder', 'Slowbro', 'Slowpoke', 'Snorlax', 'Spearow', 'Squirtle', 'Starmie', 'Staryu', 'Tangela', 'Tauros', 'Tentacool', 'Tentacruel', 'Vaporeon', 'Venomoth', 'Venonat', 'Venusaur', 'Victreebel', 'Vileplume', 'Voltorb', 'Vulpix', 'Wartortle', 'Weedle', 'Weepinbell', 'Weezing', 'Wigglytuff', 'Zapdos', 'Zubat']
+
+import { useAppContext } from '../contexts/AppContext'
 
 const convertIntoRGB = (data) => {
     let targetIndex = 0
@@ -21,18 +21,26 @@ const convertIntoRGB = (data) => {
     return inputBuffer
 }
 
-const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
+const CameraComponent = () => {
     const { hasPermission, requestPermission } = useCameraPermission()
     const device = useCameraDevice('back')
     const [prediction, setPrediction] = useState("Scanning...")
     const [takingPhoto, setTakingPhoto] = useState(false)
     const [capturedImage, setCapturedImage] = useState(null)
 
+    const { model } = useAppContext()
+    const navigation = useNavigation()
+
     useEffect(() => {
         if (!hasPermission) {
             requestPermission()
         }
     }, [hasPermission, requestPermission])
+    useEffect(()=>{
+        if (hasPermission){
+            setTakingPhoto(true)
+        }
+    },[hasPermission])
 
     const photoOutput = usePhotoOutput()
 
@@ -84,15 +92,13 @@ const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
                         const predPct = maxConfidence.toFixed(2) * 100
                         setPrediction(`Prediction: ${PokemonName} with confidence ${predPct}%`)
                         console.log(`Prediction: ${PokemonName} with confidence ${predPct}%`)
-                        setMode('pokemon')
-                        setPokemon(PokemonName.toLowerCase())
+                        navigation.navigate('Pokemon', {pokemon:PokemonName.toLowerCase()})
                     } else {
                         console.log("Max confidence: ", maxConfidence)
                         console.log("Max index: ", maxIndex)
                         console.log("predicted pokemon: ", POKEMONS[maxIndex])
                         setPrediction("No confident prediction")
-                        setTop5(top5)
-                        setMode('notConfident')
+                        navigation.navigate('NotConfident', {top5: top5})
                         console.log("No confident prediction")
                     }
                     photo.dispose()
@@ -109,7 +115,7 @@ const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
 
     if (!hasPermission) {
         return (
-            <View style={styles.center}>
+            <View className="flex-1 items-center justify-center">
                 <Text>No Camera Permission</Text>
             </View>
         )
@@ -119,11 +125,7 @@ const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
 
     return (
         <View style={{ flex: 1 }}>
-            {!takingPhoto && !capturedImage && (
-                <View style={styles.center}>
-                    <Button title="Take Picture" onPress={() => setTakingPhoto(true)} />
-                </View>
-            )}
+            
             {takingPhoto && device && (
                 <View style={StyleSheet.absoluteFillObject}>
                     <Camera
@@ -132,7 +134,7 @@ const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
                         style={StyleSheet.absoluteFill}
                         outputs={[photoOutput]}
                     />
-                    <View style={styles.buttonCtn}>
+                    <View className="absolute bottom-52 self-center">
                         <Button
                             title="Click Picture"
                             onPress={() => {
@@ -144,25 +146,7 @@ const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
 
             )}
 
-            {capturedImage && !takingPhoto && (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text>Picture Taken!</Text>
-                    <NitroImage
-                        style={styles.previewImage}
-                        image={capturedImage}
-                    />
-                    <Text style={styles.predictionText}>{prediction}</Text>
-                    <View style={styles.buttonCtn}>
-
-                        <Button title="Take Another Picture" onPress={() => {
-                            setCapturedImage(null)
-                            setTakingPhoto(true)
-                        }} />
-                    </View>
-                </View>
-
-            )}
-            <Pressable onPress={()=>setMode(null)} className="absolute bottom-10 bg-p2 color-text1 p-4 rounded-lg text-3xl">
+            <Pressable onPress={() => navigation.goBack()} className="absolute bottom-10 bg-p2 color-text1 p-4 rounded-lg text-3xl">
                 <Text>Back</Text>
             </Pressable>
         </View>
@@ -171,30 +155,3 @@ const CameraComponent = ({ model, setMode, setPokemon, setTop5 }) => {
 }
 
 export default CameraComponent
-
-const styles = StyleSheet.create({
-    center: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    previewImage: {
-        width: '90%',
-        height: '90%',
-        borderRadius: 10
-    },
-    buttonCtn: {
-        position: 'absolute',
-        bottom: 50,
-        alignSelf: 'center'
-
-    },
-    predictionText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginVertical: 10,
-        color: '#fff',
-        position: 'absolute',
-        bottom: 120,
-    }
-})

@@ -1,11 +1,19 @@
 import { StyleSheet, Text, View, Pressable, Image, ImageBackground, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import pokeApi from '../utils/pokeApi'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { useAppContext } from '../contexts/AppContext'
+import Tab from '../components/Tab'
 
 const getPokemon = async (pokemon) => {
-  const data = await pokeApi.get(`pokemon/${pokemon}`)
-  console.log(data.data.types)
-  return data.data
+  try {
+    const data = await pokeApi.get(`pokemon/${pokemon}`)
+    console.log(data.data.types)
+    return data.data
+  } catch (error) {
+    console.error("Error fetching pokemon: ", error)
+    return null
+  }
 }
 const getPokemonSpecies = async (pokemon) => {
   const data = await pokeApi.get(`pokemon-species/${pokemon}`)
@@ -79,7 +87,11 @@ const typeColours = {
   fairy: '#D685AD',
 };
 
-const Pokemon = ({ pokemon, setPokemon, setMode, setBackgroundImage, setBlur }) => {
+const Pokemon = () => {
+  const route = useRoute()
+  const { pokemon } = route.params
+  console.log("Rendering Pokemon: ", pokemon)
+  const { setBackgroundImage, setBlur, resetBackground } = useAppContext()
   const [data, setData] = useState(null)
   const [types, setTypes] = useState([])
   const [abilities, setAbilities] = useState(null)
@@ -91,6 +103,7 @@ const Pokemon = ({ pokemon, setPokemon, setMode, setBackgroundImage, setBlur }) 
   const [summary, setSummary] = useState(null)
   const [evolutions, setEvolutions] = useState(null)
   const [loadingEvolutions, setLoadingEvolutions] = useState(false)
+  const navigation = useNavigation()
   useEffect(() => {
     setData(null)
     setSpeciesData(null)
@@ -107,17 +120,6 @@ const Pokemon = ({ pokemon, setPokemon, setMode, setBackgroundImage, setBlur }) 
     fetchPokemon()
   }
     , [pokemon])
-  useEffect(() => {
-
-    const fetchPokemon = async () => {
-      const pokemonData = await getPokemon(pokemon)
-      const pokemonSpeciesData = await getPokemonSpecies(pokemon)
-      setData(pokemonData)
-      setSpeciesData(pokemonSpeciesData)
-    }
-    fetchPokemon()
-  }
-    , [])
 
   useEffect(() => {
     if (data && data.types && data.types.length > 0) {
@@ -302,7 +304,7 @@ const Pokemon = ({ pokemon, setPokemon, setMode, setBackgroundImage, setBlur }) 
                   {evolutions.map((evo, index) => (
                     <View key={index} className="flex-row items-center">
                       <Pressable
-                        onPress={() => evo.name !== data.name && setPokemon(evo.name)}
+                        onPress={() => evo.name !== data.name && navigation.navigate('Pokemon', { pokemon: evo.name })}
                         className={`items-center p-2 rounded-xl ${evo.name === data.name ? 'bg-p1/20 border-2 border-[#75DDAE]' : ''}`}
                       >
                         <Image source={{ uri: evo.sprite }} className="h-20 w-20" />
@@ -335,10 +337,7 @@ const Pokemon = ({ pokemon, setPokemon, setMode, setBackgroundImage, setBlur }) 
       </View>}
 
 
-      <Pressable onPress={() => { setPokemon(null); setMode(null); setBackgroundImage(home); setBlur(0) }}
-        className="bg-text1 p-3 rounded-lg mt-50 absolute bottom-5 ">
-        <Text className="text-gray-800">Back</Text>
-      </Pressable>
+      <Tab/>
     </View>
   )
 }

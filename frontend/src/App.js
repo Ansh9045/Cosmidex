@@ -1,57 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Image, Pressable, ImageBackground } from 'react-native';
-import CameraComponent from './components/CameraComponent';
-import UploadComponent from './components/UploadComponent';
-import { useState, useEffect } from "react";
-import { loadTensorflowModel, TensorflowModel } from 'react-native-fast-tflite'
-import { Asset } from 'expo-asset'
+import {View, ImageBackground} from 'react-native'
 import '../global.css'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import Home from './pages/Home';
-import {BlurView} from 'expo-blur'
-import Pokemon from './pages/Pokemon';
+
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context'
+import {AppProvider, useAppContext} from './contexts/AppContext'
+
+import Home from './pages/Home'
+import CameraComponent from './components/CameraComponent'
+import UploadComponent from './components/UploadComponent'
+import Pokemon from './pages/Pokemon'
 import NotConfident from './pages/NotConfident'
+import AllPokemon from './pages/AllPokemon'
+import AppBackground from './components/AppBackground'
 
-const home = require('../assets/bg7.jpg')
-export default function App() {
-  const [backgroundImage, setBackgroundImage] = useState(home)
-  const [mode, setMode] = useState('pokemon')
-  const [model, setModel] = useState(null)
-  const [pokemon, setPokemon] = useState("bulbasaur")
-  const [blur, setBlur] = useState(0)
-  const [top5, setTop5] = useState([])
-  useEffect(() => {
-    async function loadModel() {
-      try {
-        const asset = Asset.fromModule(require('../assets/best.tflite'))
-        await asset.downloadAsync()
-        if (!asset.localUri) {
-          console.error("Failed to load model, no local URI")
-        }
+const Stack = createNativeStackNavigator()
 
-        const m = await loadTensorflowModel({ url: asset.localUri }, [])
-        setModel(m)
-      }
-      catch (e) {
-        console.log("Error loading model", e)
-      }
-    }
-    loadModel()
-  }, [])
-  return (
-    <View className="flex-1 bg-indigo-900">
-      <SafeAreaProvider>
-        <ImageBackground source={backgroundImage} className="flex-1" resizeMode="cover" blurRadius={blur}>
-          <SafeAreaView className="flex-1">
-            {!pokemon && !mode && <Home setMode={setMode}/>}
-            {!pokemon && mode=="camera" && <CameraComponent model={model} setPokemon={setPokemon} setMode={setMode} setTop5={setTop5}/>}
-            {!pokemon && mode=="upload" && <UploadComponent model={model} setPokemon={setPokemon} setMode={setMode} setTop5={setTop5}/>}
-            {pokemon &&mode=='pokemon' && <Pokemon pokemon={pokemon} setBlur={setBlur} setBackgroundImage={setBackgroundImage} setPokemon={setPokemon} setMode={setMode}/>}
-            {mode=='notConfident' && <NotConfident top5={top5} setMode={setMode} setPokemon={setPokemon} setBackgroundImage={setBackgroundImage} setBlur={setBlur}/>}
-          </SafeAreaView>
-        </ImageBackground>
-      </SafeAreaProvider>
-    </View>
-  );
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+  }
 }
 
+const AppShell = ()=>{
+  const {backgroundImage, blur} = useAppContext()
+
+  return(
+    <View className="flex-1 bg-indigo-900 min-h-screen">
+      <AppBackground source={backgroundImage} resizeMode="cover" className="flex-1" blurRadius={blur}>
+        <SafeAreaView className="flex-1">
+          <NavigationContainer theme={navTheme}>
+            <Stack.Navigator screenOptions={{headerShown:false, animation:'fade',contentStyle:{backgroundColor:'transparent'}}}>
+              <Stack.Screen name="Home" component={Home}/>
+              <Stack.Screen name="Pokemon" component={Pokemon}/>
+              <Stack.Screen name="All" component={AllPokemon}/>
+              <Stack.Screen name="Camera" component={CameraComponent}/>
+              <Stack.Screen name="Upload" component={UploadComponent}/>
+              <Stack.Screen name="NotConfident" component={NotConfident}/>
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SafeAreaView>
+        
+      </AppBackground>
+    </View>
+  )
+}
+
+const App=()=>{
+  return(
+    <SafeAreaProvider>
+      <AppProvider>
+        <AppShell/>
+      </AppProvider>
+    </SafeAreaProvider>
+  )
+}
+
+export default App

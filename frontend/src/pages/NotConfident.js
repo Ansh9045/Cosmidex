@@ -1,6 +1,10 @@
 import { StyleSheet, Text, View, Pressable, Image, ActivityIndicator } from 'react-native'
 import { useEffect, useState } from 'react'
 import pokeApi from '../utils/pokeApi'
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAppContext } from '../contexts/AppContext';
+import Tab from '../components/Tab';
+
 const typeColours = {
     normal: '#A8A77A',
     fire: '#EE8130',
@@ -21,7 +25,6 @@ const typeColours = {
     steel: '#B7B7CE',
     fairy: '#D685AD',
 };
-const home = require('../../assets/bg7.jpg')
 const background = require('../../assets/bg1.jpg')
 
 const getPokemon = async (pokemon) => {
@@ -30,7 +33,12 @@ const getPokemon = async (pokemon) => {
     return data.data
 }
 
-const NotConfident = ({ top5, setMode, setPokemon, setBackgroundImage, setBlur }) => {
+const NotConfident = ({ setPokemon}) => {
+    const navigation = useNavigation()
+    const route = useRoute()
+    const {top5} = route.params
+    const {setBackgroundImage, setBlur, resetBackground} = useAppContext()
+
     const [pokemonDetails, setPokemonDetails] = useState([])
     const [loading, setLoading] = useState(true)
 
@@ -88,8 +96,7 @@ const NotConfident = ({ top5, setMode, setPokemon, setBackgroundImage, setBlur }
                     {pokemonDetails.map((p, index) => (
                         <Pressable key={index}
                             onPress={() => {
-                                setPokemon(p.name)
-                                setMode('pokemon')
+                                navigation.navigate('Pokemon', {pokemon: p.name})
                             }}
                             className="flex-row items-center bg-p1/10 rounded-lg p-3 border border-[#75DDAE] gap-3"
                         >
@@ -119,7 +126,6 @@ const NotConfident = ({ top5, setMode, setPokemon, setBackgroundImage, setBlur }
                                 <Text className="text-text1 font-bold text-base">
                                     {(p.prob * 100).toFixed(1)}%
                                 </Text>
-                                {/* mini bar */}
                                 <View className="w-16 h-1.5 rounded-full overflow-hidden bg-white/10 mt-1">
                                     <View
                                         className="h-full rounded-full"
@@ -137,12 +143,7 @@ const NotConfident = ({ top5, setMode, setPokemon, setBackgroundImage, setBlur }
 
 
             </View>
-            <Pressable
-        onPress={() => { setMode(null); setBackgroundImage(home); setBlur(0) }}
-        className="bg-text1 p-3 rounded-lg absolute bottom-5"
-      >
-        <Text className="text-gray-800">Back</Text>
-      </Pressable>
+            <Tab/>
         </View>
     )
 }
