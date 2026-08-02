@@ -187,12 +187,12 @@ const Pokemon = () => {
 
         <View className="flex-1 items-center bg-[#0C1125] absolute w-full top-[40%] h-[60%] p-3">
 
-          <View className="flex-row w-full justify-center items-center">
+          <View className="flex-row w-full justify-center items-center mt-1">
             <Text className="text-[#79E7B8]  text-4xl">{data.name.toUpperCase()}</Text>
             <Text className="text-[#79E7B8] font-bold text-3xl absolute right-0">#{data.id}</Text>
           </View>
 
-          <View className="flex-row gap-4 w-full justify-center items-center mt-1 border-b-2 border-[#75DDAE] pb-1">
+          <View className="flex-row gap-4 w-full justify-center items-center mt-5 border-b-2 border-[#75DDAE] pb-1">
             <Pressable onPress={() => setDataMode("info")}>
               <Text className={`text-text1 p-3 pl-6 pr-6 ${dataMode == "info" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full' : ''}`}>INFO</Text>
             </Pressable>
@@ -337,7 +337,7 @@ const Pokemon = () => {
       </View>}
 
 
-      <Tab/>
+      <Tab show={false}/>
     </View>
   )
 }

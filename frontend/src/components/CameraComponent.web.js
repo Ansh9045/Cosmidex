@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, Pressable, Button } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useIsFocused } from '@react-navigation/native'
 import { useAppContext } from '../contexts/AppContext'
 import * as tf from '@tensorflow/tfjs'
 
@@ -39,36 +39,53 @@ const CameraComponent = () => {
     const streamRef = useRef(null)
     const { model } = useAppContext()
     const navigation = useNavigation()
+    const isFocused = useIsFocused()
+
+    const stopCamera = ()=>{
+        if (streamRef.current){
+            streamRef.current.getTracks().forEach(t => t.stop())
+            streamRef.current = null
+        }
+        if (videoRef.current){
+            videoRef.current.srcObject = null
+        }
+    }
 
     useEffect(() => {
         let cancelled = false
-        const requestPermission = async () => {
+        const startCamera = async () =>{
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                    video : {facingMode: 'environment'}
                 })
-
                 if (cancelled) {
                     stream.getTracks().forEach(t => t.stop())
                 }
                 streamRef.current = stream
-                if (videoRef.current) {
+
+                if (videoRef.current){
                     videoRef.current.srcObject = stream
                 }
                 setHasPermission(true)
+                setTaking(true)
             } catch (error) {
-                console.log("Error getting camera permissions: ", error)
+                console.log("Error accessing camera: ", error)
                 setDenied(true)
             }
+
         }
-        requestPermission()
+
+        if (isFocused){
+            startCamera()
+        }
+        else{
+            stopCamera()
+        }
         return () => {
             cancelled = true
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(t => t.stop())
-            }
+            stopCamera()
         }
-    }, [])
+    }, [isFocused])
     useEffect(() => {
         if (hasPermission) {
             setTaking(true)

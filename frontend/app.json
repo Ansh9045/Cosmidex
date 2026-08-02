@@ -49,7 +49,7 @@
       "expo-asset"
     ],
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logo.png"
     }
   }
 }

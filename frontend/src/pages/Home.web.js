@@ -16,7 +16,9 @@ const Home = () => {
       <View className="mt-32 mb-20 w-[70%] max-h-[70%] bg-[#0C1125] rounded-xl border border-[#75DDAE] flex-row overflow-hidden">
 
         <View className="w-[40%] items-center justify-center border-r pt-20 border-[#75DDAE]/30 py-8 px-6">
-            <img src={require('../../assets/bg7.jpg').uri} className="absolute top-0 left-0 h-full w-full object-cover" />
+
+          <img src={require('../../assets/bg7.jpg').uri} className="absolute top-0 left-0 h-full w-full object-cover" />
+
           <View className="items-center justify-center relative h-32 w-32 mb-4">
             <View className="absolute h-full w-full rounded-full bg-p1/10" />
             <View className="h-24 w-24 rounded-full border-2 border-[#75DDAE] items-center justify-center">
@@ -60,7 +62,7 @@ const Home = () => {
             onPress={() => navigation.navigate('All')}
           >
             <img src={require('../../assets/pokeball.png').uri} className="h-10 w-10" />
-            
+
             <View>
               <Text className="text-[#79E7B8] font-bold text-base">All Pokémon</Text>
               <Text className="text-text2 text-xs">Browse the full Pokédex</Text>

@@ -1,6 +1,8 @@
 import { View, Text, Pressable, Image } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useAppContext } from '../contexts/AppContext'
+import { useState, useEffect} from 'react'
+import RNShake from 'react-native-shake'
 
 const TABS = [
     { route: 'Home', label: 'Home', icon: require('../../assets/home.png') },
@@ -9,10 +11,25 @@ const TABS = [
     { route: 'Upload', label: 'Upload', icon: require('../../assets/gallery.png') },
 ]
 
-const Tab = () => {
+const Tab = ({show=true}) => {
     const navigation = useNavigation()
     const route = useRoute()
     const {resetBackground} = useAppContext()
+    const [visible, setVisible] = useState(false)
+
+    useEffect(()=>{
+        const subscription = RNShake.addListener(()=>{
+            setVisible((p)=> !p)
+        })
+        return () => subscription.remove()
+    }, [])
+
+    if (!visible && !show) return (
+        <View clasName="absolute bottom-0 w-full items-center p-3">
+            <Text className="text-text1/60 text-xs">Shake to toggle Tab!</Text>
+        </View>
+    )
+
 
     return (
         <View className="absolute bottom-0 w-full flex-row justify-between items-center bg-[#0C1125] border-2 border-[#75DDAE] rounded-full px-1 py-2">

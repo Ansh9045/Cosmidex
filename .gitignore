@@ -19,5 +19,5 @@ frontend/src/components/blank2
 frontend/src/components/blank
 frontend2/
 runs/
-
+.gitignore
 *.gitignore
