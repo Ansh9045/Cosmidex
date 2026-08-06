@@ -1,16 +1,14 @@
-import { StyleSheet, Text, View, Pressable, Image, ImageBackground, ActivityIndicator } from 'react-native'
+import { StyleSheet,ScrollView, Text, View, Pressable, Image, ImageBackground, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import pokeApi from '../utils/pokeApi'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useAppContext } from '../contexts/AppContext'
 import Tab from '../components/Tab'
 import logo from '../../assets/logo.png'
-console.log(logo.uri)
 
 const getPokemon = async (pokemon) => {
   try {
     const data = await pokeApi.get(`pokemon/${pokemon}`)
-    console.log(data.data.types)
     return data.data
   } catch (error) {
     console.error("Error fetching pokemon: ", error)
@@ -42,13 +40,27 @@ const getEvolutionChain = async (url) => {
         types: pokemonData.types.map(type => type.type.name)
       })
     }
-    console.log("Evolution Chain: ", allEvolutions)
     return allEvolutions
   } catch (error) {
     console.error("Error fetching evolution chain: ", error)
     return null
   }
 }
+
+const getPokemonEncounters = async (pokemon) => {
+  try {
+    const data = await pokeApi.get(`pokemon/${pokemon}/encounters`)
+    return data.data
+  } catch (error) {
+    console.error("Error fetching pokemon encounters: ", error)
+    return null
+  }
+}
+
+const formatLocation = (name) => {
+  return name.replace(/-/g, ' ').replace(/\barea\b/gi, '').trim().split(' ').filter(Boolean).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+}
+
 const typeBackgrounds = {
   fire: require('../../assets/fire.jpg'),
   water: require('../../assets/water.jpg'),
@@ -88,11 +100,16 @@ const typeColours = {
   steel: '#B7B7CE',
   fairy: '#D685AD',
 };
+const GEN1_VERSIONS = ['red', 'blue', 'yellow']
+const versionColours = {
+  red: { bg: '#DC2626', text: '#FFFFFF' },
+  blue: { bg: '#2563EB', text: '#FFFFFF' },
+  yellow: { bg: '#FACC15', text: '#0C1125' },
+}
 
 const Pokemon = () => {
   const route = useRoute()
   const { pokemon } = route.params
-  console.log("Rendering Pokemon: ", pokemon)
   const { setBackgroundImage, setBlur, resetBackground } = useAppContext()
   const [data, setData] = useState(null)
   const [types, setTypes] = useState([])
@@ -106,11 +123,16 @@ const Pokemon = () => {
   const [evolutions, setEvolutions] = useState(null)
   const [loadingEvolutions, setLoadingEvolutions] = useState(false)
   const navigation = useNavigation()
+  const [spawns, setSpawns] = useState(null)
+  const [loadingSpawns, setLoadingSpawns] = useState(false)
+
   useEffect(() => {
     setData(null)
     setSpeciesData(null)
     setStats(null)
     setEvolutions(null)
+    setDataMode("info")
+    setSpawns(null)
     setDataMode("info")
 
     const fetchPokemon = async () => {
@@ -127,14 +149,12 @@ const Pokemon = () => {
     if (data && data.types && data.types.length > 0) {
       const types = data.types.map(type => type.type.name)
       setTypes(types)
-      console.log(types)
       setBackgroundImage(typeBackgrounds[types[0]])
       setBlur(20)
     }
     if (data && data.abilities && data.abilities.length > 0) {
       const ability = data.abilities.map(ability => ability.ability.name)
       setAbilities(ability[0])
-      console.log("Abilities: ", ability[0])
     }
 
     if (data && data.height && data.weight) {
@@ -142,25 +162,17 @@ const Pokemon = () => {
       const w = data.weight / 10
       setHeight(h)
       setWeight(w)
-      console.log("Height: ", h, "m")
-      console.log("Weight: ", w, "kg")
     }
     if (data && data.stats && data.stats.length > 0) {
       const s = data.stats.map(stat => ({ name: stat.stat.name, value: stat.base_stat }))
       setStats(s)
-      console.log("Stats: ", s)
     }
     if (speciesData && speciesData.flavor_text_entries && speciesData.flavor_text_entries.length > 0) {
       let flavorText = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en')
       flavorText = flavorText.flavor_text.replace(/\n|\f/g, ' ')
-      console.log("Summary: ", flavorText)
       setSummary(flavorText)
     }
   }, [data, speciesData])
-  useEffect(() => {
-    console.log(dataMode)
-
-  }, [dataMode])
 
   const handleEvolutionsPress = async () => {
     setDataMode("evolutions")
@@ -171,6 +183,42 @@ const Pokemon = () => {
       setLoadingEvolutions(false)
     }
   }
+  const handleSpawnsPress = async () => {
+    setDataMode("spawns")
+    if (!spawns && !loadingSpawns) {
+      setLoadingSpawns(true)
+      const encountersData = await getPokemonEncounters(pokemon)
+      if (encountersData && encountersData.length > 0) {
+        const processed = encountersData.map(loc => {
+          const versions = new Set()
+          const methods = new Set()
+          let minLevel = Infinity
+          let maxLevel = -Infinity
+          loc.version_details.forEach(vd => {
+            if (!GEN1_VERSIONS.includes(vd.version.name)) return
+            versions.add(vd.version.name)
+            vd.encounter_details.forEach(ed => {
+              methods.add(ed.method.name)
+              if (ed.min_level < minLevel) minLevel = ed.min_level
+              if (ed.max_level > maxLevel) maxLevel = ed.max_level
+            })
+          })
+          return {
+            location: formatLocation(loc.location_area.name),
+            versions: Array.from(versions),
+            methods: Array.from(methods),
+            minLevel: minLevel === Infinity ? null : minLevel,
+            maxLevel: maxLevel === -Infinity ? null : maxLevel
+          }
+        }).filter(loc => loc.versions.length > 0)
+        setSpawns(processed)
+      }
+      else {
+        setSpawns([])
+      }
+      setLoadingSpawns(false)
+    }
+  }
 
   return (
     <View className="flex-1 justify-center items-center">
@@ -178,9 +226,9 @@ const Pokemon = () => {
         <img src={require('../../assets/logo.png').uri} className="h-32 w-32" />
         <Text className="text-3xl font-bold text-text1">Cosmidex</Text>
       </View>
-      
 
-      {data && types[0]&& <View className="mt-10 w-[70%] h-max-[50%] max-w-5xl rounded-lg overflow-hidden flex-row">
+
+      {data && types[0] && <View className="mt-10 w-[70%] h-[65%] max-w-5xl rounded-lg overflow-hidden flex-row">
         <View className="w-[50%] justify-center items-center">
           <img src={typeBackgrounds[types[0]].uri} className="flex-1 absolute h-full w-full" />
           <Image source={{ uri: data.sprites.other['official-artwork'].front_default }} className="h-[280px] w-[280px]" />
@@ -194,16 +242,25 @@ const Pokemon = () => {
             <Text className="text-[#79E7B8] font-bold text-3xl absolute right-0">#{data.id}</Text>
           </View>
 
-          <View className="flex-row gap-4 w-full justify-center items-center mt-1 border-b-2 border-[#75DDAE] pb-1">
-            <Pressable onPress={() => setDataMode("info")}>
-              <Text className={`text-text1 p-3 pl-6 pr-6 ${dataMode == "info" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full' : ''}`}>INFO</Text>
-            </Pressable>
-            <Pressable onPress={() => setDataMode("stats")}>
-              <Text className={`text-text1 p-3 pl-6 pr-6 ${dataMode == "stats" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full ' : ''}`}>STATS</Text>
-            </Pressable>
-            <Pressable onPress={handleEvolutionsPress}>
-              <Text className={`text-text1 p-3 pl-6 pr-6 ${dataMode == "evolutions" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full ' : ''}`}>EVOLUTIONS</Text>
-            </Pressable>
+          <View className="h-14 mt-4 border-b-2 border-[#75DDAE] pb-1">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ alignItems: 'center', paddingHorizontal: 10 }}
+            >
+              <Pressable onPress={() => setDataMode("info")}>
+                <Text className={`text-text1 p-3 px-5 ${dataMode == "info" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full' : ''}`}>INFO</Text>
+              </Pressable>
+              <Pressable onPress={() => setDataMode("stats")}>
+                <Text className={`text-text1 p-3 px-5 ${dataMode == "stats" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full ' : ''}`}>STATS</Text>
+              </Pressable>
+              <Pressable onPress={handleEvolutionsPress}>
+                <Text className={`text-text1 p-3 px-5 ${dataMode == "evolutions" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full ' : ''}`}>EVOLUTIONS</Text>
+              </Pressable>
+              <Pressable onPress={handleSpawnsPress}>
+                <Text className={`text-text1 p-3 px-5 ${dataMode == "spawns" ? 'bg-p1/20 border-[#75DDAE] border-2 rounded-full ' : ''}`}>SPAWN</Text>
+              </Pressable>
+            </ScrollView>
           </View>
           {dataMode === "info" && <View className="flex-1 w-full mt-3 px-3">
             <View className="justify-center items-center gap-2 mb-5">
@@ -334,12 +391,65 @@ const Pokemon = () => {
               )}
             </View>
           )}
+          {dataMode === "spawns" && (
+            <View className="flex-1 w-full mt-3 px-2">
+              <View className="justify-center items-center gap-2 mb-3">
+                <Text className="text-text2 text-2xl underline">SPAWN LOCATIONS</Text>
+              </View>
+              {loadingSpawns && (
+                <View className="flex-1 justify-center items-center">
+                  <ActivityIndicator size="large" color="#75DDAE" />
+                </View>
+              )}
+              {!loadingSpawns && spawns && spawns.length == 0 && (
+                <Text className="text-text1 text-center mt-6">This Pokémon can't be found in the wild.</Text>
+              )}
+              {!loadingSpawns && spawns && spawns.length > 0 && (
+                <ScrollView className="flex-1 w-full" showsVerticalScrollIndicator={false}>
+                  {spawns.map((spawn, index) => (
+                    <View key={index} className="w-full mb-3 p-4 rounded-xl bg-white/5 border border-[#75DDAE]/20">
+                      <View className="flex-row items-start gap-1.5 mb-3">
+                        <Text className="text-text1 font-bold text-sm flex-1" numberOfLines={2}>
+                          {spawn.location}
+                        </Text>
+                      </View>
 
+                      <View className="flex-row flex-wrap gap-1.5 mb-3">
+                        {spawn.versions.map((v, i) => {
+                          const colours = versionColours[v] || { bg: '#75DDAE', text: '#0C1125' }
+                          return (
+                            <View key={i} className="flex-1">
+                              <Text
+                                className="text-[10px] px-2.5 py-1 rounded-full capitalize font-bold text-center"
+                                style={{ backgroundColor: colours.bg, color: colours.text }}
+                              >
+                                {v}
+                              </Text>
+                            </View>
+                          )
+                        })}
+                      </View>
+
+                      <View className="flex-row justify-between items-center pt-2.5 border-t border-[#75DDAE]/15">
+                        <Text className="text-text2 text-xs capitalize">{spawn.methods.join(', ')}</Text>
+                        {spawn.minLevel != null && (
+                          <Text className="text-text1 text-xs font-bold bg-white/10 px-2.5 py-1 rounded-full">
+                            Lv {spawn.minLevel}–{spawn.maxLevel}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+
+            </View>
+          )}
         </View>
       </View>}
 
 
-      <Tab/>
+      <Tab />
     </View>
   )
 }

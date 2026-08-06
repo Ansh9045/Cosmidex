@@ -5,7 +5,6 @@ import Tab from '../components/Tab'
 
 const Home = () => {
 
-    console.log("Rendering Home")
     const navigation = useNavigation()
     return (
         <View className="flex-1 items-center justify-center">

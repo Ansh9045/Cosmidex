@@ -86,7 +86,6 @@ const AllPokemon = () => {
       setAll(details.filter(Boolean).sort((a, b) => a.id - b.id))
       setPokemonCache(details.filter(Boolean).sort((a, b) => a.id - b.id))
       setLoading(false)
-      console.log("All Pokemon Length: ", details.length)
     }
     fetchAll()
   }, [])
