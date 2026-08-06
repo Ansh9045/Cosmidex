@@ -40,7 +40,7 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
 ### 5. Medal
    - If the user successfully catches all 151 pokemon, the user receives a medal and the caught pokemons stored in local storage are reset to 0.
 ### 6. The Pokemon Page
-   - The pokemon page displays crucial information about the pokemon like it's pokedex summary (flavor text), it's types, height, weight, base stats and evolutions.
+   - The pokemon page displays crucial information about the pokemon like it's pokedex summary (flavor text), it's types, height, weight, base stats, spawn locations and evolutions.
    - The page gets this data from the pokeAPI.
 ### 7. The All Pokemon Page
    - This page displays a list of 151 pokemon by default, each pokemon has their image, types, names and pokedex ids displayed. 
