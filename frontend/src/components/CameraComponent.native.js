@@ -28,7 +28,7 @@ const CameraComponent = () => {
     const [takingPhoto, setTakingPhoto] = useState(false)
     const [capturedImage, setCapturedImage] = useState(null)
 
-    const { model } = useAppContext()
+    const { model, catchPokemon } = useAppContext()
     const navigation = useNavigation()
 
     useEffect(() => {
@@ -61,13 +61,9 @@ const CameraComponent = () => {
                     image.dispose()
                     const rawBuffer = resizedImage.toRawPixelData()
                     const typedBuffer = new Uint8Array(rawBuffer.buffer)
-                    console.log("Typed buffer length: ", typedBuffer.length)
-                    console.log("First 10 bytes of typed buffer: ", typedBuffer.slice(0, 10))
-                    console.log("Format of rawBuffer: ", rawBuffer.pixelFormat)
                     resizedImage.dispose()
                     const inputTensor = convertIntoRGB(typedBuffer)
                     const output = model.runSync([inputTensor.buffer])
-                    console.log("Model output: ", output.length)
                     const probabilities = new Float32Array(output[0])
                     const top5 = Array.from(probabilities)
                         .map((p, i) => ({
@@ -77,7 +73,6 @@ const CameraComponent = () => {
                         .sort((a, b) => b.prob - a.prob)
                         .slice(0, 5)
 
-                    console.log(top5)
                     let maxConfidence = 0
                     let maxIndex = -1
                     for (let i = 0; i < probabilities.length; i++) {
@@ -91,21 +86,17 @@ const CameraComponent = () => {
                         const PokemonName = POKEMONS[maxIndex] || `unknown index ${maxIndex}`
                         const predPct = maxConfidence.toFixed(2) * 100
                         setPrediction(`Prediction: ${PokemonName} with confidence ${predPct}%`)
-                        console.log(`Prediction: ${PokemonName} with confidence ${predPct}%`)
+                        catchPokemon(PokemonName)
                         navigation.navigate('Pokemon', {pokemon:PokemonName.toLowerCase()})
                     } else {
-                        console.log("Max confidence: ", maxConfidence)
-                        console.log("Max index: ", maxIndex)
-                        console.log("predicted pokemon: ", POKEMONS[maxIndex])
                         setPrediction("No confident prediction")
                         navigation.navigate('NotConfident', {top5: top5})
-                        console.log("No confident prediction")
                     }
                     photo.dispose()
                     setTakingPhoto(false)
                 }
             } catch (error) {
-                console.log("Error taking photo ", error)
+                console.error("Error taking photo ", error)
                 setTakingPhoto(false)
             }
         }

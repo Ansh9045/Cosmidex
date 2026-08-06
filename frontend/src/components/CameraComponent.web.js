@@ -37,7 +37,7 @@ const CameraComponent = () => {
     const [image, setImage] = useState(null)
     const videoRef = useRef(null)
     const streamRef = useRef(null)
-    const { model } = useAppContext()
+    const { model, catchPokemon } = useAppContext()
     const navigation = useNavigation()
     const isFocused = useIsFocused()
 
@@ -69,7 +69,7 @@ const CameraComponent = () => {
                 setHasPermission(true)
                 setTaking(true)
             } catch (error) {
-                console.log("Error accessing camera: ", error)
+                console.error("Error accessing camera: ", error)
                 setDenied(true)
             }
 
@@ -120,7 +120,6 @@ const CameraComponent = () => {
                 .sort((a, b) => b.prob - a.prob)
                 .slice(0, 5)
 
-            console.log(top5)
             let maxConfidence = 0
             let maxIndex = -1
             for (let i = 0; i < probabilities.length; i++) {
@@ -133,19 +132,15 @@ const CameraComponent = () => {
                 const PokemonName = POKEMONS[maxIndex] || `unknown index ${maxIndex}`
                 const predPct = maxConfidence.toFixed(2) * 100
                 setPrediction(`Prediction: ${PokemonName} with confidence ${predPct}%`)
-                console.log(`Prediction: ${PokemonName} with confidence ${predPct}%`)
+                catchPokemon(PokemonName)
                 navigation.navigate('Pokemon', { pokemon: PokemonName.toLowerCase() })
             } else {
-                console.log("Max confidence: ", maxConfidence)
-                console.log("Max index: ", maxIndex)
-                console.log("predicted pokemon: ", POKEMONS[maxIndex])
                 setPrediction("No confident prediction")
                 navigation.navigate('NotConfident', { top5: top5 })
-                console.log("No confident prediction")
             }
 
         } catch (error) {
-            console.log("Error loading Image: ", error)
+            console.error("Error loading Image: ", error)
             setTaking(true)
         }
     }

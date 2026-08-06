@@ -37,7 +37,7 @@ const NotConfident = ({ setPokemon }) => {
     const navigation = useNavigation()
     const route = useRoute()
     const { top5 } = route.params
-    const { setBackgroundImage, setBlur, resetBackground } = useAppContext()
+    const { setBackgroundImage, setBlur, resetBackground, catchPokemon } = useAppContext()
 
     const [pokemonDetails, setPokemonDetails] = useState([])
     const [loading, setLoading] = useState(true)
@@ -96,6 +96,7 @@ const NotConfident = ({ setPokemon }) => {
                     {pokemonDetails.map((p, index) => (
                         <Pressable key={index}
                             onPress={() => {
+                                catchPokemon(p.name)
                                 navigation.navigate('Pokemon', { pokemon: p.name })
                             }}
                             className="flex-1 items-center justify-center bg-p1/10 rounded-lg p-3 border border-[#75DDAE] gap-3"

@@ -26,7 +26,7 @@ const convertIntoRGB = (data) => {
 export default function UploadComponent() {
     const [image, setImage] = useState(null)
     const [prediction, setPrediction] = useState(null)
-    const {model} =  useAppContext()
+    const {model, catchPokemon} =  useAppContext()
     const navigation = useNavigation()
     const pickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -48,13 +48,11 @@ export default function UploadComponent() {
         try {
             const img = await loadImage({ url: result.assets[0].uri })
 
-            console.log(result.assets[0].uri)
             if (img) {
                 const side = Math.min(img.width, img.height)
                 const x = (img.width - side) / 2
                 const y = (img.height - side) / 2
                 const cropped = await img.cropAsync(x, y, side, side)
-                console.log("Cropped image size: ", cropped.width, cropped.height)
                 setImage(cropped)
                 const resizedImage = await cropped.resizeAsync(224, 224)
                 const rawBuffer = await resizedImage.toRawPixelData()
@@ -72,7 +70,6 @@ export default function UploadComponent() {
                             .sort((a, b) => b.prob - a.prob)
                             .slice(0, 5)
 
-                        console.log(top5)
                         let maxConfidence = 0
                         let maxIndex = -1
                         for (let i = 0; i < probabilities.length; i++) {
@@ -85,18 +82,14 @@ export default function UploadComponent() {
                             const PokemonName = POKEMONS[maxIndex] || `unknown index ${maxIndex}`
                             const predPct = maxConfidence.toFixed(2) * 100
                             setPrediction(`Prediction: ${PokemonName} with confidence ${predPct}%`)
-                            console.log(`Prediction: ${PokemonName} with confidence ${predPct}%`)
+                            catchPokemon(PokemonName)
                             navigation.navigate('Pokemon', {pokemon:PokemonName.toLowerCase()})
                         } else {
-                            console.log("Max confidence: ", maxConfidence)
-                            console.log("Max index: ", maxIndex)
-                            console.log("predicted pokemon: ", POKEMONS[maxIndex])
                             setPrediction("No confident prediction")
                             navigation.navigate('NotConfident', {top5:top5})
-                            console.log("No confident prediction")
                         }
                     } catch (error) {
-                        console.log("Error running model: ", error)
+                        console.error("Error running model: ", error)
                     }
 
                 }

@@ -26,6 +26,8 @@ const typeColours = {
   fairy: '#D685AD',
 };
 
+const TOTAL_POKEMON = 151
+
 const background = require('../../assets/bg9.jpg')
 
 const getAll = async () => {
@@ -50,11 +52,13 @@ const getPokemon = async (pokemon) => {
 }
 
 const AllPokemon = () => {
-  const { setBackgroundImage, setBlur, setPokemonCache, pokemonCache } = useAppContext()
+  const { setBackgroundImage, setBlur, setPokemonCache, pokemonCache, caughtPokemon, medal } = useAppContext()
   const [loading, setLoading] = useState(true)
   const navigation = useNavigation()
   const [search, setSearch] = useState('')
   const [all, setAll] = useState([])
+  const [showCaughtOnly, setShowCaughtOnly] = useState(false)
+
 
   useEffect(() => {
     if (pokemonCache) {
@@ -87,7 +91,8 @@ const AllPokemon = () => {
     fetchAll()
   }, [])
 
-  const filtered = all.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+  const filtered = all.filter(p => p.name.toLowerCase().includes(search.toLowerCase())).filter(p => !showCaughtOnly || caughtPokemon.includes(p.name))
+
 
 
   return (
@@ -100,9 +105,10 @@ const AllPokemon = () => {
       <View className="flex-1 mt-36 mb-20 w-[70%] bg-[#0C1125] rounded-xl border border-[#75DDAE] ">
         <View className="items-center mb-2 border-b-2 border-[#75DDAE] pb-3 p-4">
           <Text className="text-[#79E7B8] text-3xl">All Pokemon</Text>
-          <Text className="text-text1 mt-1">
-            {all.length} Pokémon
-          </Text>
+          <View className="flex-row items-center gap-3 mt-1">
+            <Text className="text-text1">{caughtPokemon.length} / {TOTAL_POKEMON} caught</Text>
+            {medal > 0 && <Text className="text-[#FFD700] font-bold">🏅 x{medal}</Text>}
+          </View>
           <TextInput
             className="text-text1 border-2 border-[#75DDAE] rounded-full w-full px-4 py-2 mt-3"
             placeholder="Search Pokémon..."
@@ -110,6 +116,12 @@ const AllPokemon = () => {
             onChangeText={setSearch}
             placeholderTextColor="#75DDAE80"
           />
+          <Pressable
+            onPress={() => setShowCaughtOnly(!showCaughtOnly)}
+            className={`mt-3 px-4 py-1.5 rounded-full border-2 ${showCaughtOnly ? 'bg-p1/20 border-[#75DDAE]' : 'border-[#75DDAE]/40'}`}
+          >
+            <Text className='text-text1 text-sm'>{showCaughtOnly ? 'Showing Caught Only' : 'Show Caught Only'}</Text>
+          </Pressable>
         </View>
         {loading ? (
           <View className="flex-1 items-center justify-center">
@@ -126,36 +138,49 @@ const AllPokemon = () => {
             maxToRenderPerBatch={12}
             windowSize={7}
             removeClippedSubviews={true}
-            renderItem={({ item: p }) => (<Pressable
-              onPress={() => navigation.navigate('Pokemon', { pokemon: p.name })}
-              className="flex-1 items-center bg-p1/10 rounded-lg p-2 border border-[#75DDAE] "
-            >
-              <Text className="text-p1 font-bold text-xs self-start">#{p.id}</Text>
-              {p.sprite ? (
-                <Image source={{ uri: p.sprite }} className="h-20 w-20" />
-              ) : (
-                <Text>?</Text>
-              )}
-              <Text className="text-[#79E7B8] font-bold text-xs capitalize mt-1" numberOfLines={1}>
-                {p.name}
-              </Text>
-              <View className="flex-row flex-wrap gap-1 mt-1 justify-center">
-                {p.types.map((type, i) => (
-                  <View
-                    key={i}
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: typeColours[type] }}
-                  />
-                ))}
-              </View>
-
-            </Pressable>)}
+            renderItem={({ item: p }) => {
+              const caught = caughtPokemon.includes(p.name.toLowerCase())
+              return (
+                <Pressable
+                  onPress={() => navigation.navigate('Pokemon', { pokemon: p.name })}
+                  className={`flex-1 items-center rounded-lg p-2 border relative ${caught ? 'bg-[#75DDAE]/20 border-[#79E7B8]' : 'bg-p1/10 border-[#75DDAE]/40'}`}
+                >
+                  {caught && (
+                    <View className="absolute top-1 right-1 h-6 w-6 rounded-full border-[#FFD700] items-center justify-center z-10">
+                      <Text className="text-[15px]">🏅</Text>
+                    </View>
+                  )}
+                  <Text className="text-p1 font-bold text-xs self-start">#{p.id}</Text>
+                  {p.sprite ? (
+                    <Image
+                      source={{ uri: p.sprite }}
+                      className="h-20 w-20"
+                    />
+                  ) : (
+                    <Text>?</Text>
+                  )}
+                  <Text className="text-[#79E7B8] font-bold text-xs capitalize mt-1" numberOfLines={1}>
+                    {p.name}
+                  </Text>
+                  <View className="flex-row flex-wrap gap-1 mt-1 justify-center">
+                    {p.types.map((type, i) => (
+                      <View
+                        key={i}
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: typeColours[type] }}
+                      />
+                    ))}
+                  </View>
+                </Pressable>
+              )
+            }}
             ListEmptyComponent={
-              <Text className="text-text1 text-center mt-6">No Pokémon match your search.</Text>
+              <Text className="text-text1 text-center mt-6">
+                {showCaughtOnly ? "You haven't caught any Pokémon yet." : "No Pokémon match your search."}
+              </Text>
             }
           />
         )}
-
       </View>
       <Tab />
 
