@@ -42,7 +42,7 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
 ### 6. The Pokemon Page
    - The pokemon page displays crucial information about the pokemon like it's pokedex summary (flavor text), it's types, height, weight, base stats, spawn locations and evolutions.
    - The page gets this data from the pokeAPI.
-### 7. The All Pokemon Page
+### 7. The All Pokemon Page (Pokedex Page)
    - This page displays a list of 151 pokemon by default, each pokemon has their image, types, names and pokedex ids displayed. 
    - The page also displays the medal and pokemon caught count of the user.
    - The user can search a pokemon by its name using the search bar.
@@ -52,6 +52,9 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
    - The app is inside an app background container that allows to dynamically change the background.
    - Each page has a separate background.
    - Each pokemon type has a separate background, matching their aesthetics. 
+### 9. Guess The Pokemon
+   - It is a guess the pokemon game, you can play it by navigating to it from the Pokedex page.
+   - Guessing a pokemon correctly would add it to your caught pokemon list ;).
 
 
 ## Credits
