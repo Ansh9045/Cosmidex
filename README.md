@@ -9,7 +9,7 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
 
 ---
 ## Tutorial: 
-1. Open the app in web or install the apk file.
+1. Open the app in web or install the apk file using this [link](https://expo.dev/accounts/ansh_904/projects/Cosmidex/builds/488831dd-17c8-4a32-b2d3-adad03d5025e).
 2. Choose between: 
    - Use Camera: Use your device's camera to capture a image of a pokemon, identify it and look at it's stats
    - Upload Image: Identify a pokemon using an image inside your gallery and get its stats.
@@ -21,7 +21,7 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
 > 
 > Try it now:  
 > Web: https://pokedex-murex-five-84.vercel.app/   
-> Android: coming soon
+> Android: https://expo.dev/accounts/ansh_904/projects/Cosmidex/builds/488831dd-17c8-4a32-b2d3-adad03d5025e
 
 ## How it Works
 
