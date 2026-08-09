@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View, Pressable, ScrollView, Image, ImageBackground, ActivityIndicator } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import pokeApi from '../utils/pokeApi'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useAppContext } from '../contexts/AppContext'
 import Tab from '../components/Tab'
-
+import { createAudioPlayer } from 'expo-audio'
 
 const getPokemon = async (pokemon) => {
   try {
@@ -77,7 +77,7 @@ const typeBackgrounds = {
   ice: require('../../assets/ice.jpg'),
   poison: require('../../assets/poison.jpg'),
   psychic: require('../../assets/psychic.jpg'),
-  rock: require('../../assets/rock.png'),
+  rock: require('../../assets/rock.jpg'),
   fairy: require('../../assets/fairy.jpg'),
 }
 const home = require('../../assets/bg7.jpg')
@@ -111,7 +111,7 @@ const versionColours = {
 const Pokemon = () => {
   const route = useRoute()
   const { pokemon } = route.params
-  const { setBackgroundImage, setBlur, resetBackground } = useAppContext()
+  const { setBackgroundImage, setBlur, audioMuted, toggleAudio, isShiny, toggleShiny, caughtPokemon } = useAppContext()
   const [data, setData] = useState(null)
   const [types, setTypes] = useState([])
   const [abilities, setAbilities] = useState(null)
@@ -126,6 +126,9 @@ const Pokemon = () => {
   const navigation = useNavigation()
   const [spawns, setSpawns] = useState(null)
   const [loadingSpawns, setLoadingSpawns] = useState(false)
+  const playerRef = useRef(null)
+
+  const caught = caughtPokemon.includes(pokemon)
 
   useEffect(() => {
     setData(null)
@@ -174,6 +177,38 @@ const Pokemon = () => {
     }
   }, [data, speciesData])
 
+
+  useEffect(() => {
+    if (!data || !data.cries || audioMuted) return
+    const cryUrl = data.cries.latest
+    if (!cryUrl) return
+
+    if (playerRef.current) {
+      playerRef.current.remove()
+      playerRef.current = null
+    }
+    const player = createAudioPlayer(cryUrl)
+    playerRef.current = player
+
+    const subscription = player.addListener('playbackStatusUpdate', (status) => {
+      if (status.didJustFinish) {
+        player.remove()
+        if (playerRef.current === player) {
+          playerRef.current = null
+        }
+      }
+    })
+    player.play()
+    return () => {
+      subscription.remove()
+      player.remove()
+      if (playerRef.current === player) {
+        playerRef.current = null
+      }
+    }
+
+
+  }, [data, audioMuted])
 
   const handleEvolutionsPress = async () => {
     setDataMode("evolutions")
@@ -231,14 +266,24 @@ const Pokemon = () => {
 
       {data && <View className="flex-1 mt-36 p-0 w-[90%] rounded-lg ">
         <ImageBackground resizeMode="cover" source={typeBackgrounds[types[0]]} className="rounded-lg flex-1 justify-center items-center absolute w-full h-[40%]">
-
-          <Image source={{ uri: data.sprites.other['official-artwork'].front_default }} className="h-[250px] w-[250px]" />
+          <Pressable className="absolute top-3 right-3 p-2 rounded-full border border-[#75DDAE] bg-p1/10" onPress={toggleAudio}>
+            <Text>{audioMuted ? "🔇" : "🔊"}</Text>
+          </Pressable>
+          {caught && 
+            <View className="absolute top-1 left-1 rounded-full border-[#FFD700] items-center justify-center z-10">
+              <Text className="text-[25px]">🏅</Text>
+            </View>
+          }
+          <Image source={{ uri: isShiny ? data.sprites.other['official-artwork'].front_shiny : data.sprites.other['official-artwork'].front_default }} className="h-[250px] w-[250px]" />
         </ImageBackground>
 
 
         <View className="flex-1 items-center bg-[#0C1125] absolute w-full top-[40%] h-[60%] p-3">
 
           <View className="flex-row w-full justify-center items-center mt-1">
+            <Pressable onPress={toggleShiny} className={`absolute left-0 p-2 rounded-full border-2 border-amber-400 ${isShiny ? 'bg-amber-400/20' : 'bg-transparent'}`}>
+              <Text className="text-xl">✨</Text>
+            </Pressable>
             <Text className="text-[#79E7B8]  text-4xl">{data.name.toUpperCase()}</Text>
             <Text className="text-[#79E7B8] font-bold text-3xl absolute right-0">#{data.id}</Text>
           </View>

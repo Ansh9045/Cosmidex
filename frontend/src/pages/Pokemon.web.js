@@ -1,5 +1,5 @@
-import { StyleSheet,ScrollView, Text, View, Pressable, Image, ImageBackground, ActivityIndicator } from 'react-native'
-import { useState, useEffect } from 'react'
+import { StyleSheet, ScrollView, Text, View, Pressable, Image, ImageBackground, ActivityIndicator } from 'react-native'
+import { useState, useEffect, useRef } from 'react'
 import pokeApi from '../utils/pokeApi'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import { useAppContext } from '../contexts/AppContext'
@@ -76,7 +76,7 @@ const typeBackgrounds = {
   ice: require('../../assets/ice.jpg'),
   poison: require('../../assets/poison.jpg'),
   psychic: require('../../assets/psychic.jpg'),
-  rock: require('../../assets/rock.png'),
+  rock: require('../../assets/rock.jpg'),
   fairy: require('../../assets/fairy.jpg'),
 }
 const home = require('../../assets/bg7.jpg')
@@ -110,7 +110,7 @@ const versionColours = {
 const Pokemon = () => {
   const route = useRoute()
   const { pokemon } = route.params
-  const { setBackgroundImage, setBlur, resetBackground } = useAppContext()
+  const { setBackgroundImage, setBlur, audioMuted, toggleAudio, isShiny, toggleShiny, caughtPokemon } = useAppContext()
   const [data, setData] = useState(null)
   const [types, setTypes] = useState([])
   const [abilities, setAbilities] = useState(null)
@@ -125,6 +125,9 @@ const Pokemon = () => {
   const navigation = useNavigation()
   const [spawns, setSpawns] = useState(null)
   const [loadingSpawns, setLoadingSpawns] = useState(false)
+  const audioRef = useRef(null)
+
+  const caught = caughtPokemon.includes(pokemon)
 
   useEffect(() => {
     setData(null)
@@ -173,6 +176,25 @@ const Pokemon = () => {
       setSummary(flavorText)
     }
   }, [data, speciesData])
+
+  useEffect(() => {
+    if (!data || !data.cries || audioMuted) return
+    const cryUrl = data.cries.latest || data.cries.legacy
+    if (!cryUrl) return
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+
+    const audio = new window.Audio(cryUrl)
+    audioRef.current = audio
+    audio.play().catch((e) => console.error("Error playing audio: ", e))
+
+    return () => {
+      audio.pause()
+      if (audioRef.current === audio) audioRef.current = null
+    }
+  }, [data, audioMuted])
 
   const handleEvolutionsPress = async () => {
     setDataMode("evolutions")
@@ -230,14 +252,25 @@ const Pokemon = () => {
 
       {data && types[0] && <View className="mt-10 w-[70%] h-[65%] max-w-5xl rounded-lg overflow-hidden flex-row">
         <View className="w-[50%] justify-center items-center">
+          <Pressable className="absolute top-3 right-3 p-2 rounded-full z-50 border border-[#75DDAE] bg-p1/10" onPress={toggleAudio}>
+            <Text>{audioMuted ? "🔇" : "🔊"}</Text>
+          </Pressable>
+          {caught &&
+            <View className="absolute top-1 left-1 rounded-full border-[#FFD700] items-center justify-center z-10">
+              <Text className="text-[25px]">🏅</Text>
+            </View>
+          }
           <img src={typeBackgrounds[types[0]].uri} className="flex-1 absolute h-full w-full" />
-          <Image source={{ uri: data.sprites.other['official-artwork'].front_default }} className="h-[280px] w-[280px]" />
+          <Image source={{ uri: isShiny ? data.sprites.other['official-artwork'].front_shiny : data.sprites.other['official-artwork'].front_default }} className="h-[280px] w-[280px]" />
         </View>
 
 
         <View className="flex-1 items-center py-7 px-10 gap-3 bg-[#0C1125] p-3">
 
           <View className="flex-row w-full justify-center items-center">
+            <Pressable onPress={toggleShiny} className={`absolute left-0 p-2 rounded-full border-2 border-amber-400 ${isShiny ? 'bg-amber-400/20' : 'bg-transparent'}`}>
+              <Text className="text-xl">✨</Text>
+            </Pressable>
             <Text className="text-[#79E7B8]  text-4xl">{data.name.toUpperCase()}</Text>
             <Text className="text-[#79E7B8] font-bold text-3xl absolute right-0">#{data.id}</Text>
           </View>

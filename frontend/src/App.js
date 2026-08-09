@@ -12,6 +12,7 @@ import UploadComponent from './components/UploadComponent'
 import Pokemon from './pages/Pokemon'
 import NotConfident from './pages/NotConfident'
 import AllPokemon from './pages/AllPokemon'
+import Guess from './pages/Guess'
 import AppBackground from './components/AppBackground'
 
 const Stack = createNativeStackNavigator()
@@ -39,6 +40,7 @@ const AppShell = ()=>{
               <Stack.Screen name="Camera" component={CameraComponent}/>
               <Stack.Screen name="Upload" component={UploadComponent}/>
               <Stack.Screen name="NotConfident" component={NotConfident}/>
+              <Stack.Screen name="Guess" component={Guess}/>
             </Stack.Navigator>
           </NavigationContainer>
         </SafeAreaView>

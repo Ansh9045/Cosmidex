@@ -5,7 +5,7 @@ import CatchToast from '../components/CatchToast'
 const AppContext = createContext(null)
 
 const home = require('../../assets/bg7.jpg')
-const TOTAL_POKEMON = 5
+const TOTAL_POKEMON = 151
 const CAUGHT_KEY = 'caughtPokemon'
 const MEDAL_KEY = 'medalCount'
 
@@ -19,6 +19,8 @@ export const AppProvider = ({children}) => {
     const [caughtPokemon, setCaughtPokemon] = useState([])
     const [medal, setMedal] = useState(0)
     const [catchMessage, setCatchMessage] = useState(null)
+    const [audioMuted, setAudioMuted] = useState(false)
+    const [isShiny, setIsShiny] = useState(false)
 
 
     useEffect(()=>{
@@ -64,7 +66,12 @@ export const AppProvider = ({children}) => {
         setBackgroundImage(home)
         setBlur(10)
     }
-    
+    const toggleAudio = ()=>{
+        setAudioMuted(!audioMuted)
+    }
+    const toggleShiny = ()=>{
+        setIsShiny(!isShiny)
+    }
     const catchPokemon = (name) =>{
         const key = name.toLowerCase()
 
@@ -106,7 +113,7 @@ export const AppProvider = ({children}) => {
 
     
   return (
-    <AppContext.Provider value={{model, backgroundImage,pokemonCache, setPokemonCache, setBackgroundImage, blur, setBlur, resetBackground, caughtPokemon, catchPokemon, medal,catchMessage}}>
+    <AppContext.Provider value={{model, backgroundImage,pokemonCache, setPokemonCache, setBackgroundImage, blur, setBlur, resetBackground, caughtPokemon, catchPokemon, medal,catchMessage, audioMuted, toggleAudio, isShiny, toggleShiny}}>
         {children}
         <CatchToast/>
     </AppContext.Provider>

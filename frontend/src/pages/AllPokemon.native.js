@@ -51,7 +51,7 @@ const getPokemon = async (pokemon) => {
 }
 
 const AllPokemon = () => {
-  const { setBackgroundImage, setBlur, setPokemonCache, pokemonCache, caughtPokemon, medal } = useAppContext()
+  const { setBackgroundImage, setBlur, setPokemonCache, pokemonCache, caughtPokemon, medal, isShiny, toggleShiny } = useAppContext()
   const [loading, setLoading] = useState(true)
   const navigation = useNavigation()
   const [search, setSearch] = useState('')
@@ -76,6 +76,7 @@ const AllPokemon = () => {
         return {
           name: d.name,
           sprite: d.sprites.other['official-artwork'].front_default,
+          shinySprite: d.sprites.other['official-artwork'].front_shiny,
           types: d.types.map(t => t.type.name),
           id: d.id
         }
@@ -87,6 +88,7 @@ const AllPokemon = () => {
     }
     fetchAll()
   }, [])
+
 
   const filtered = all.filter(p => p.name.toLowerCase().includes(search.toLowerCase())).filter(p => !showCaughtOnly || caughtPokemon.includes(p.name.toLowerCase()))
 
@@ -101,6 +103,12 @@ const AllPokemon = () => {
       <View className="flex-1 mt-36 mb-20 w-[90%] bg-[#0C1125] rounded-lg">
         <View className="items-center mb-2 border-b-2 border-[#75DDAE] pb-3 p-4">
           <Text className="text-[#79E7B8] text-3xl">All Pokemon</Text>
+          <Pressable
+            onPress={toggleShiny}
+            className={`absolute top-4 left-4 h-9 w-9 rounded-full border-2 border-[#FFD700] items-center justify-center z-10 ${isShiny ? 'bg-[#FFD700]/20' : 'bg-[#0C1125]'}`}
+          >
+            <Text className="text-base">✨</Text>
+          </Pressable>
           <View className="flex-row items-center gap-3 mt-1">
             <Text className="text-text1">
               {caughtPokemon.length} / {TOTAL_POKEMON} caught
@@ -116,14 +124,23 @@ const AllPokemon = () => {
             onChangeText={setSearch}
             placeholderTextColor="#75DDAE80"
           />
-          <Pressable
-            onPress={() => setShowCaughtOnly((prev) => !prev)}
-            className={`mt-3 px-4 py-1.5 rounded-full border-2 ${showCaughtOnly ? 'bg-p1/20 border-[#75DDAE]' : 'border-[#75DDAE]/40'}`}
-          >
-            <Text className="text-text1 text-xs">
-              {showCaughtOnly ? 'Showing Caught Only' : 'Show Caught Only'}
-            </Text>
-          </Pressable>
+          <View className="flex-row gap-4 mt-3">
+            <Pressable
+              onPress={() => setShowCaughtOnly((prev) => !prev)}
+              className={`mt-3 px-4 py-1.5 rounded-full border-2 ${showCaughtOnly ? 'bg-p1/20 border-[#75DDAE]' : 'border-[#75DDAE]/40'}`}
+            >
+              <Text className="text-text1 text-sm">
+                {showCaughtOnly ? 'Showing Caught Only' : 'Show Caught Only'}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('Guess')}
+              className="mt-3 px-4 py-1.5 rounded-full border-2 border-[#75DDAE] bg-p1/20"
+            >
+              <Text className="text-text1 text-sm">Guess the Pokémon!</Text>
+            </Pressable>
+          </View>
+
         </View>
         {loading ? (
           <View className="flex-1 items-center justify-center">
@@ -142,6 +159,7 @@ const AllPokemon = () => {
             removeClippedSubviews={true}
             renderItem={({ item: p }) => {
               const caught = caughtPokemon.includes(p.name.toLowerCase())
+              const displaySprite = (isShiny && p.shinySprite) ? p.shinySprite : p.sprite
               return (
                 <Pressable
                   onPress={() => navigation.navigate('Pokemon', { pokemon: p.name })}
@@ -155,7 +173,7 @@ const AllPokemon = () => {
                   <Text className="text-p1 font-bold text-xs self-start">#{p.id}</Text>
                   {p.sprite ? (
                     <Image
-                      source={{ uri: p.sprite }}
+                      source={{ uri: displaySprite }}
                       className="h-20 w-20"
                     />
                   ) : (

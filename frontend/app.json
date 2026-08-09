@@ -46,7 +46,8 @@
           }
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-audio"
     ],
     "web": {
       "favicon": "./assets/logo.png"

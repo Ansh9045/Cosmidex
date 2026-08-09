@@ -20,7 +20,7 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
 
 > 
 > Try it now:  
-> Web: https://pokedex-murex-five-84.vercel.app/ 
+> Web: https://pokedex-murex-five-84.vercel.app/   
 > Android: coming soon
 
 ## How it Works
