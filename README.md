@@ -63,4 +63,7 @@ A real life Pokedex app(android + web) that can classify generation 1 pokemon wi
 ### 3. Gallery Icon - [Superndre - FLATICON](https://www.flaticon.com/authors/superndre)
 ### 4. Camera Icon - [Saepul Nahwan - FLATICON](https://www.flaticon.com/authors/saepul-nahwan)
 ### 5. Pokeball Icon - [Mayor Icons - FLATICON](https://www.flaticon.com/authors/mayor-icons)
-### 6. Cosmidex Logo - AI Generated using [ChatGPT](https://chatgpt.com)
+### 6. Cosmidex Logo - Downloaded from [WikiMedia](https://commons.wikimedia.org/wiki/File:Pokebola-pokeball-png-0.png)
+### 7. Medal Icon - [Magnific - FLATICON](https://www.flaticon.com/authors/magnific)
+
+Note for stardance reviewer - I changed the only ai generated Art that I used in the app, that was the logo to an image from WikiMedia (which is listed in the public domain) and gave proper credits to it, I also changed the banner for stardance project to a screenshot of the app, please accept the project now :(
